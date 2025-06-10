@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo App</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 500px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #4a5568, #2d3748);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.8;
+        font-weight: 300;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .todo-form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+      }
+
+      .todo-input {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 16px;
+        background: #f7fafc;
+        transition: all 0.3s ease;
+      }
+
+      .todo-input:focus {
+        outline: none;
+        border-color: #4299e1;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      }
+
+      .add-btn {
+        padding: 15px 25px;
+        background: linear-gradient(135deg, #4299e1, #3182ce);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+      }
+
+      .todos-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .todo-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .todo-item:hover {
+        background: #edf2f7;
+        transform: translateX(5px);
+      }
+
+      .todo-text {
+        flex: 1;
+        font-size: 16px;
+        color: #2d3748;
+      }
+
+      .done-btn {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #48bb78, #38a169);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .done-btn:hover {
+        background: linear-gradient(135deg, #38a169, #2f855a);
+        transform: scale(1.05);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #718096;
+      }
+
+      .empty-state .emoji {
+        font-size: 3rem;
+        margin-bottom: 10px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+
+        .header {
+          padding: 20px;
+        }
+
+        .content {
+          padding: 20px;
+        }
+
+        .todo-form {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Todo App</h1>
+        <p>Stay organized and get things done</p>
+      </div>
+
+      <div class="content">
+        <form class="todo-form" id="todoForm">
+          <input
+            type="text"
+            class="todo-input"
+            name="task"
+            placeholder="Enter your task..."
+            required
+          />
+          <button type="submit" class="add-btn">Add Task</button>
+        </form>
+
+        <div class="todos-list" id="todosList">
+          {% if todos %} {% for todo in todos %}
+          <div class="todo-item" data-id="{{ todo[0] }}">
+            <span class="todo-text">{{ todo[1] }}</span>
+            <button class="done-btn" onclick="markDone('{{ todo[0] }}')">
+              Done
+            </button>
+          </div>
+          {% endfor %} {% else %}
+          <div class="empty-state">
+            <div class="emoji">📝</div>
+            <p>No tasks yet. Add your first task above!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $("#todoForm").on("submit", function (event) {
+          event.preventDefault();
+
+          let taskInput = $("input[name='task']");
+          let task = taskInput.val().trim();
+
+          if (task === "") {
+            alert("Please enter a task!");
+            return;
+          }
+
+          $.ajax({
+            url: "/add",
+            type: "POST",
+            data: { task: task },
+            success: function (response) {
+              if (response.success) {
+                // Remove empty state if it exists
+                $(".empty-state").remove();
+
+                // Add new todo item
+                let todoItem = `
+                                <div class="todo-item" data-id="${response.id}">
+                                    <span class="todo-text">${response.task}</span>
+                                    <button class="done-btn" onclick="markDone(${response.id})">Done</button>
+                                </div>
+                            `;
+                $("#todosList").prepend(todoItem);
+                taskInput.val("");
+              } else {
+                alert("Error: " + response.error);
+              }
+            },
+            error: function (xhr, status, error) {
+              console.error("AJAX Error:", status, error);
+              alert("Failed to add task. Please try again.");
+            },
+          });
+        });
+      });
+
+      function markDone(todoId) {
+        $.ajax({
+          url: `/delete/${todoId}`,
+          type: "DELETE",
+          success: function (response) {
+            if (response.success) {
+              $(`[data-id="${todoId}"]`).fadeOut(300, function () {
+                $(this).remove();
+
+                // Show empty state if no todos left
+                if ($(".todo-item").length === 0) {
+                  $("#todosList").html(`
+                                    <div class="empty-state">
+                                        <div class="emoji">📝</div>
+                                        <p>No tasks yet. Add your first task above!</p>
+                                    </div>
+                                `);
+                }
+              });
+            } else {
+              alert("Failed to delete task. Please try again.");
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error("Delete Error:", status, error);
+            alert("Failed to delete task. Please try again.");
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
