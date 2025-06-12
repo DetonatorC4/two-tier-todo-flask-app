@@ -1,0 +1,47 @@
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: todoapp
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    networks:
+      - todonet
+    volumes:
+      - mysql-todo-data:/var/lib/mysql
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-padmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+    container_name: web
+    restart: always
+    environment:
+      MYSQL_DATABASE: todoapp
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_HOST: mysql
+      MYSQL_USER: admin
+    ports:
+      - "5000:5000"
+    networks:
+      - todonet
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+networks:
+  todonet:
+
+volumes:
+  mysql-todo-data:
