@@ -23,8 +23,7 @@ services:
       start_period: 30s
 
   web:
-    build:
-      context: .
+    image: aayush103/todo-app
     container_name: web
     restart: always
     environment:
