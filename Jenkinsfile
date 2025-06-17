@@ -7,6 +7,11 @@ pipeline{
                 git url: "https://github.com/DetonatorC4/two-tier-todo-flask-app.git", branch: "main"
             }
         }
+        stage("trivy fs scan"){
+            steps{
+                sh "trivy fs . -o results.json"
+            }
+        }
         stage("build"){
             steps{
                 sh "docker build -t todo-app ."
