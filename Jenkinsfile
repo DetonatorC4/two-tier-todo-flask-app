@@ -12,7 +12,9 @@ pipeline{
         }
         stage("trivy fs scan"){
             steps{
-                sh "trivy fs . -o results.json"
+                script{
+                    trivy_fs()
+                }
             }
         }
         stage("build"){
@@ -22,10 +24,8 @@ pipeline{
         }
         stage("push to dockerhub"){
             steps{
-                withCredentials([usernamePassword(credentialsId:"dockerHubCreds", passwordVariable: "PASSWORD", usernameVariable: "USERNAME")]) {
-                    sh "docker login -u ${env.USERNAME} -p ${env.PASSWORD}"
-                    sh "docker tag todo-app ${env.USERNAME}/todo-app:latest"
-                    sh "docker push ${env.USERNAME}/todo-app:latest"
+                script{
+                    docker_push("dockerHubCreds", "todo-app")
                 }
             }
         }
