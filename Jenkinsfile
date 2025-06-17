@@ -13,7 +13,7 @@ pipeline{
         stage("trivy fs scan"){
             steps{
                 script{
-                    trivy()
+                    sh "trivy fs . -o results.json"
                 }
             }
         }
