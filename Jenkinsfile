@@ -27,4 +27,24 @@ pipeline{
             }
         }
     }
+
+    post{
+        success{
+            script{
+                emailext from: 'aayushd711@gmail.com',
+                to: 'aayushdarange29@gmail.com',
+                body: 'Build success for todo app',
+                subject: 'Build Successful'
+            }
+        }
+        failure{
+            script{
+                emailext from: 'aayushd711@gmail.com',
+                to: 'aayushdarange29@gmail.com',
+                body: 'Build failed for todo app',
+                subject: 'Build Failed'
+            }
+        }
+    }
+
 }
