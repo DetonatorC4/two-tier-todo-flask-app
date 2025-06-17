@@ -1,10 +1,13 @@
+@Library("shared") _
 pipeline{
     agent {label "dev"};
 
     stages{
         stage("code fetch"){
             steps{
-                git url: "https://github.com/DetonatorC4/two-tier-todo-flask-app.git", branch: "main"
+                script{
+                    clone("https://github.com/DetonatorC4/two-tier-todo-flask-app.git", "main")
+                }
             }
         }
         stage("trivy fs scan"){
