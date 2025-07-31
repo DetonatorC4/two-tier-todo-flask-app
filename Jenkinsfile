@@ -1,6 +1,6 @@
 @Library("shared") _
 pipeline{
-
+    agent any;
     stages{
         stage("code fetch"){
             steps{
