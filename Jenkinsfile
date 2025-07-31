@@ -1,6 +1,5 @@
 @Library("shared") _
 pipeline{
-    agent {label "dev"};
 
     stages{
         stage("code fetch"){
